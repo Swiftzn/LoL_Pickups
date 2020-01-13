@@ -8,6 +8,8 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using MingweiSamuel.Camille;
 using MingweiSamuel.Camille.Enums;
+using DSharpPlus.Interactivity;
+using DSharpPlus.Entities;
 
 namespace LoL_Pickups
 {
@@ -18,7 +20,7 @@ namespace LoL_Pickups
         public async Task lastgame(CommandContext ctx, string summonername)
         {
             await ctx.TriggerTypingAsync();
-            var riotApi = RiotApi.NewInstance("RGAPI-c0bf4888-0b86-42e9-a5c0-335bc4388701");
+            var riotApi = RiotApi.NewInstance("Riot API Token");
             var summonerData = await riotApi.SummonerV4.GetBySummonerNameAsync(Region.EUW, summonername);
             var matchlist = await riotApi.MatchV4.GetMatchlistAsync(Region.EUW, summonerData.AccountId, endIndex: 1);
             var matchDataTasks = matchlist.Matches.Select(matchMetadata => riotApi.MatchV4.GetMatchAsync(Region.EUW, matchMetadata.GameId)).ToArray();
@@ -41,5 +43,23 @@ namespace LoL_Pickups
             }
         }
 
+        [Command("register")]
+        public async Task Register(CommandContext ctx)
+        {
+            await ctx.Message.DeleteAsync();
+            var interactivity = ctx.Client.GetInteractivityModule();
+            await ctx.Member.SendMessageAsync("What is your Summoner Name");
+            var msg = await interactivity.WaitForMessageAsync(xm => xm.Author.Id == ctx.Member.Id, TimeSpan.FromMinutes(1));
+            var riotApi = RiotApi.NewInstance("Riot API Token");
+            var summonerData = await riotApi.SummonerV4.GetBySummonerNameAsync(Region.EUW, msg.Message.Content);
+            var embed = new DiscordEmbedBuilder
+            {
+                Title = "Summoner Info",
+                Color = DiscordColor.Red
+            };
+            embed.AddField("Summoner Name", $"{summonerData.Name}");
+            embed.AddField("Summoner Level", $"{summonerData.SummonerLevel}");
+            await ctx.Member.SendMessageAsync(embed: embed);
+        }
     }
 }

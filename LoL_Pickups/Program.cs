@@ -2,13 +2,15 @@
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.Interactivity;
 
 namespace LoL_Pickups
 {
-    class Program
+    public class Program
     {
         static DiscordClient discord;
         static CommandsNextModule commands;
+        static InteractivityModule interactivity;
 
         static void Main(string[] args)
         {
@@ -19,7 +21,7 @@ namespace LoL_Pickups
         {
             discord = new DiscordClient(new DiscordConfiguration
             {
-                Token = "NjY0MTE1OTM4MTE4ODYwODAx.XhSYWA.WBj4yyQTcZYn70XFwD6iFlyorEM",
+                Token = "Discord Token",
                 TokenType = TokenType.Bot,
                 UseInternalLogHandler = true,
                 LogLevel = LogLevel.Debug
@@ -36,8 +38,12 @@ namespace LoL_Pickups
                 StringPrefix = "!"
             });
 
-            commands.RegisterCommands<MyCommands>();
+            interactivity = discord.UseInteractivity(new InteractivityConfiguration
+            {
 
+            });
+
+            commands.RegisterCommands<MyCommands>();
             await discord.ConnectAsync();
             await Task.Delay(-1);
         }
