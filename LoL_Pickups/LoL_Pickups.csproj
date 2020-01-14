@@ -13,4 +13,10 @@
     <PackageReference Include="System.Data.SQLite" Version="1.0.112" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
