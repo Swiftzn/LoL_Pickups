@@ -19,7 +19,7 @@ namespace LoL_Pickups
         {
             await ctx.Message.DeleteAsync();
             await ctx.TriggerTypingAsync();
-            var riotApi = RiotApi.NewInstance("RGAPI-88126a0f-51c3-4108-b16d-0d7a5c6481e9");
+            var riotApi = RiotApi.NewInstance( "RGAPI-88126a0f-51c3-4108-b16d-0d7a5c6481e9");
             var summonerData = await riotApi.SummonerV4.GetBySummonerNameAsync(Region.EUW, summonername);
             var matchlist = await riotApi.MatchV4.GetMatchlistAsync(Region.EUW, summonerData.AccountId, endIndex: 1);
             var matchDataTasks = matchlist.Matches.Select(matchMetadata => riotApi.MatchV4.GetMatchAsync(Region.EUW, matchMetadata.GameId)).ToArray();
@@ -67,7 +67,14 @@ namespace LoL_Pickups
                 var emoji = DiscordEmoji.FromName(ctx.Client, ":thumbsup:");
                 await msgid.CreateReactionAsync(emoji);
                 var em = await interactivity.WaitForReactionAsync(xe => xe == emoji, ctx.User, TimeSpan.FromMinutes(5));
-
+                if ( em != null )
+                {
+                    await dmchannel.SendMessageAsync($"Activation successfull. {em}");
+                }
+                else
+                {
+                    await dmchannel.SendMessageAsync($"Activations failed." { em});
+                }
             }
         }
         public string GetToken()
