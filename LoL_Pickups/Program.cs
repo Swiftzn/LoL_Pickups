@@ -119,6 +119,7 @@ namespace LoL_Pickups
         }
 
     }
+
     public struct ConfigJson
     {
         [JsonProperty("token")]
