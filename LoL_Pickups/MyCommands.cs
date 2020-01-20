@@ -19,7 +19,7 @@ namespace LoL_Pickups
         {
             await ctx.Message.DeleteAsync();
             await ctx.TriggerTypingAsync();
-            var riotApi = RiotApi.NewInstance( "RGAPI-88126a0f-51c3-4108-b16d-0d7a5c6481e9");
+            var riotApi = RiotApi.NewInstance("RGAPI-a78079dd-7d35-4256-89a0-e1e83af9bf9e");
             var summonerData = await riotApi.SummonerV4.GetBySummonerNameAsync(Region.EUW, summonername);
             var matchlist = await riotApi.MatchV4.GetMatchlistAsync(Region.EUW, summonerData.AccountId, endIndex: 1);
             var matchDataTasks = matchlist.Matches.Select(matchMetadata => riotApi.MatchV4.GetMatchAsync(Region.EUW, matchMetadata.GameId)).ToArray();
@@ -54,26 +54,36 @@ namespace LoL_Pickups
             }
             else
             {
-                var riotApi = RiotApi.NewInstance("RGAPI-88126a0f-51c3-4108-b16d-0d7a5c6481e9");
+                var riotApi = RiotApi.NewInstance("RGAPI-a78079dd-7d35-4256-89a0-e1e83af9bf9e");
                 var summonerData = await riotApi.SummonerV4.GetBySummonerNameAsync(Region.EUW, msg.Message.Content);
+                var token = GetToken();
                 var embed = new DiscordEmbedBuilder
                 {
                     Title = "Please verify your account.",
                     Color = DiscordColor.Red
                 };
                 embed.AddField("Summoner Name", $"{summonerData.Name}");
-                embed.AddField("Verification Code", $"{GetToken()}", true);
+                embed.AddField("Verification Code", $"{token}", true);
                 var msgid = await dmchannel.SendMessageAsync(embed: embed);
                 var emoji = DiscordEmoji.FromName(ctx.Client, ":thumbsup:");
                 await msgid.CreateReactionAsync(emoji);
                 var em = await interactivity.WaitForReactionAsync(xe => xe == emoji, ctx.User, TimeSpan.FromMinutes(5));
                 if ( em != null )
                 {
-                    await dmchannel.SendMessageAsync($"Activation successfull. {em}");
+                    var activationCode = await riotApi.ThirdPartyCodeV4.GetThirdPartyCodeBySummonerIdAsync(Region.EUW, summonerData.Id);
+                    if (activationCode == token)
+                    {
+                        await dmchannel.SendMessageAsync($"Activation successfull. {activationCode} / {token}");
+
+                    }
+                    else
+                    {
+                        await dmchannel.SendMessageAsync($"Activation failed. {activationCode} / {token}");
+                    }
                 }
                 else
                 {
-                    await dmchannel.SendMessageAsync($"Activations failed." { em});
+                    await dmchannel.SendMessageAsync($"Summoner not found. {em}");
                 }
             }
         }
